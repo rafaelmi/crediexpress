@@ -1,0 +1,158 @@
+<template>
+  <v-card
+    class="mx-auto"
+    max-width="600"
+  >
+    <v-card-title>
+      <span class="headline font-weight-bold">Bienvenido/a {{user.username}}</span>
+    </v-card-title>
+    <v-card-text>
+      <v-list-item two-line
+        @click.stop="modify('ruc')"
+      >
+        <v-list-item-content>
+          <v-list-item-title>{{toMilSeparator(comercio.ruc)}}</v-list-item-title>
+          <v-list-item-subtitle>RUC</v-list-item-subtitle>
+        </v-list-item-content>
+        <v-list-item-icon>
+          <v-icon>mdi-pencil</v-icon>
+        </v-list-item-icon>
+      </v-list-item>
+      <v-list-item two-line
+        @click.stop="modify('nombre')"
+      >
+        <v-list-item-content>
+          <v-list-item-title>{{comercio.nombre}}</v-list-item-title>
+          <v-list-item-subtitle>Nombre Comercial</v-list-item-subtitle>
+        </v-list-item-content>
+        <v-list-item-icon>
+          <v-icon>mdi-pencil</v-icon>
+        </v-list-item-icon>
+      </v-list-item>
+      <v-list-item two-line
+        @click.stop="modify('telefono')"
+      >
+        <v-list-item-content>
+          <v-list-item-title>{{comercio.telefono}}</v-list-item-title>
+          <v-list-item-subtitle>Teléfono</v-list-item-subtitle>
+        </v-list-item-content>
+        <v-list-item-icon>
+          <v-icon>mdi-pencil</v-icon>
+        </v-list-item-icon>
+      </v-list-item>
+      <v-list-item two-line
+        @click.stop="modify('direccion')"
+      >
+        <v-list-item-content>
+          <v-list-item-title>{{comercio.direccion}}</v-list-item-title>
+          <v-list-item-subtitle>Dirección</v-list-item-subtitle>
+        </v-list-item-content>
+        <v-list-item-icon>
+          <v-icon>mdi-pencil</v-icon>
+        </v-list-item-icon>
+      </v-list-item>
+      <v-list-item two-line
+        @click.stop="modify('ciudad')"
+      >
+        <v-list-item-content>
+          <v-list-item-title>{{comercio.ciudad}}</v-list-item-title>
+          <v-list-item-subtitle>Ciudad</v-list-item-subtitle>
+        </v-list-item-content>
+        <v-list-item-icon>
+          <v-icon>mdi-pencil</v-icon>
+        </v-list-item-icon>
+      </v-list-item>
+      <v-list-item two-line
+        @click.stop="modify('departamento')"
+      >
+        <v-list-item-content>
+          <v-list-item-title>{{comercio.departamento}}</v-list-item-title>
+          <v-list-item-subtitle>Departamento</v-list-item-subtitle>
+        </v-list-item-content>
+        <v-list-item-icon>
+          <v-icon>mdi-pencil</v-icon>
+        </v-list-item-icon>
+      </v-list-item>
+
+      <formField v-if="form === 'ruc'"
+        v-model="edited.ruc"
+        title="Ingresar RUC"
+        label="RUC"
+        @save="save('ruc')"
+        @close="onClose"
+      />
+      <formField v-else-if="form === 'nombre'"
+        v-model="edited.nombre"
+        title="Ingresar nombre comercial"
+        label="Nombre"
+        @save="save('nombre')"
+        @close="onClose"
+      />
+      <formField v-else-if="form === 'direccion'"
+        v-model="edited.direccion"
+        title="Ingresar dirección"
+        label="Dirección"
+        @save="save('direccion')"
+        @close="onClose"
+      />
+      <formField v-else-if="form === 'telefono'"
+        v-model="edited.telefono"
+        title="Ingresar teléfono"
+        label="Teléfono"
+        @save="save('telefono')"
+        @close="onClose"
+      />
+      <formField v-else-if="form === 'ciudad'"
+        v-model="edited.ciudad"
+        title="Ingresar ciudad"
+        label="Ciudad"
+        @save="save('ciudad')"
+        @close="onClose"
+      />
+      <formField v-else-if="form === 'departamento'"
+        v-model="edited.departamento"
+        title="Ingresar departamento"
+        label="Departamento"
+        @save="save('departamento')"
+        @close="onClose"
+      />
+
+    </v-card-text>
+  </v-card>
+</template>
+
+<script>
+import mixinApi from '@/mixins/api'
+import mixinUtils from '@/mixins/utils'
+import formField from '@/forms/Field.vue'
+
+export default {
+  components: {
+    formField
+  },
+  mixins: {
+    mixinApi,
+    mixinUtils
+  },
+  props: {
+    user: Object,
+  },
+  data: () => ({
+    comercio: {},
+    edited: {},
+    default: {
+      ruc: '',
+      nombre: '',
+      telefono: '',
+      direccion: '',
+      ciudad: '',
+      departamento: ''
+    },
+  }),
+  created () {
+    this.comercio = Object.assign({}, this.default)
+  },
+  methods: {
+  }
+};
+</script>

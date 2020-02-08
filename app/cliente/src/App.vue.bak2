@@ -1,0 +1,241 @@
+<template>
+  <v-app id="inspire">
+
+    <v-dialog v-model="wait" persistent max-width="35" color="transparent">
+      <v-card class="text-center transparent">
+        <v-progress-circular
+              indeterminate
+              color="white"
+        ></v-progress-circular>
+      </v-card>
+    </v-dialog>
+
+    <v-app-bar
+      app
+      color="blue darken-3"
+      dark
+    >
+      <v-toolbar-title>
+        <span class="font-weight-bold font-italic headline">
+          Œ« Credi<span class="green--text text--lighten-3">Expre$$</span>
+        </span>
+        <span class="blue--text text--darken-3">.</span>
+      </v-toolbar-title>
+
+    </v-app-bar>
+
+    <v-content>
+      <v-container
+        class="fill-height"
+        fluid
+      >
+        <v-row
+          align="center"
+          justify="center"
+        >
+          <v-col class="text-center">
+            <template v-if="route == 'afiliados'">
+              <Historial type="compras" v-model="historyUpdate"/>
+            </template>
+            <template v-else-if="route == 'comercios'">
+              <Historial type="ventas" v-model="historyUpdate"/>
+            </template>
+            <template v-else-if="route == 'login'">
+              <Login @success="loadHome"/>
+            </template>
+            <template v-else-if="route == 'home'">
+              <Home :user="user" class="text-left"/>
+            </template>
+            <template v-else-if="route == 'init'">
+              <Init @login="route = 'login'"/>
+            </template>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col>
+        </v-col>
+        </v-row>
+      </v-container>
+
+    </v-content>
+
+    <template v-if="user">
+
+      <v-footer app height="35" color="transparent">
+        <v-dialog v-model="nuevo" fullscreen>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              absolute
+              dark
+              fab
+              top
+              right
+              color="pink"
+              v-on="on"
+            >
+              <v-icon>mdi-plus</v-icon>
+            </v-btn>
+          </template>
+          <Vender v-if="user.tipo == 'Comercio'"
+            @close="closeTransDialog"
+          />
+          <Comprar v-else
+            @close="closeTransDialog"
+          />
+        </v-dialog>
+      </v-footer>
+
+      <v-bottom-navigation
+        app
+        background-color="blue darken-3"
+        dark
+        v-model="route"
+      >
+        <v-btn
+          value="home"
+          v-bind:disabled="route == 'login'"
+        >
+          <span>Principal</span>
+          <v-icon>mdi-home</v-icon>
+        </v-btn>
+
+        <v-btn v-if="user.tipo == 'Comercio'"
+          value="comercios"
+          v-bind:disabled="route == 'login'"
+        >
+          <span>Ventas</span>
+          <v-icon>mdi-cart</v-icon>
+        </v-btn>
+
+        <v-btn v-else
+          value="afiliados"
+          v-bind:disabled="route == 'login'"
+        >
+          <span>Compras</span>
+          <v-icon>mdi-cart</v-icon>
+        </v-btn>
+
+        <v-btn
+          value="logout"
+          v-bind:disabled="route == 'login'"
+        >
+          <span>Salir</span>
+          <v-icon>mdi-logout</v-icon>
+        </v-btn>
+
+      </v-bottom-navigation>
+    </template>
+  </v-app>
+</template>
+
+<script>
+import Login from '@/views/Login.vue'
+import Home from '@/views/Home.vue'
+import Init from '@/views/Init.vue'
+import Historial from '@/views/Historial.vue'
+import Vender from '@/views/Vender.vue'
+import Comprar from '@/views/Comprar.vue'
+import Api from '@/mixins/api'
+
+const API_URL = '/user'
+
+export default {
+  props: {
+    source: String
+  },
+  components: {
+    Init,
+    Historial,
+    Login,
+    Home,
+    Vender,
+    Comprar
+  },
+  mixins: [
+    Api
+  ],
+  data: () => ({
+    historyUpdate: false,
+    route: '',
+    user: null,
+    wait: false,
+    nuevo: false
+  }),
+  computed: {
+    /* logged() {
+      return 'username' in this.user;
+    } */
+  },
+  watch: {
+    route (val) {
+      if (val === 'logout') {
+        this.wait = true
+        this.user = null
+        this.route = 'init'
+        this.apiCommand({
+          url: API_URL,
+          command: 'logout',
+          args: {}
+        })
+          .then((result) => {
+            if (result.result === 200) {
+              this.error = ''
+            }
+            this.wait = false
+          })
+      }
+    }
+  },
+  created () {
+    this.loadHome()
+  },
+  methods: {
+    updateUser () {
+      this.apiCommand({
+        url: API_URL,
+        command: 'info',
+        args: {}
+      })
+        .then((result) => {
+          console.log(result)
+          if (result.result === 200) {
+            this.error = ''
+            this.user = result.data
+            if (this.route === '' || this.route === 'init') {
+              this.loadHome()
+            }
+          } else {
+            this.route = 'init'
+          }
+        })
+    },
+    loadAfiliados () {
+      this.route = 'afiliados'
+    },
+    loadComercios () {
+      this.route = 'comercios'
+    },
+    loadHome (user) {
+      if (user) {
+        this.user = user
+      }
+      if (this.user) {
+        this.route = 'home'
+      } else {
+        this.updateUser()
+      }
+    },
+    closeTransDialog () {
+      switch (this.route) {
+        case 'afiliados':
+        case 'comercios':
+          this.historyUpdate = true
+          break
+        default:
+      }
+      this.updateUser()
+      this.nuevo = false
+    }
+  }
+}
+</script>
